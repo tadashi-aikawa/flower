@@ -2,11 +2,11 @@ import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 const ffmpeg = createFFmpeg({ log: true });
 ffmpeg.load();
 
-interface BinaryFile {
+export type BinaryFile = {
   name: string;
   size: number;
   url: string;
-}
+};
 
 export async function convertToGif(
   file: File,
