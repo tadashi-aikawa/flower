@@ -6,6 +6,7 @@ export type BinaryFile = {
   name: string;
   size: number;
   url: string;
+  type: "image/gif" | "video/mp4";
 };
 
 export async function convertToGif(
@@ -33,5 +34,37 @@ export async function convertToGif(
     name: outputName,
     size: blob.size,
     url: URL.createObjectURL(blob),
+    type: "image/gif",
+  };
+}
+
+export async function convertToMp4(
+  file: File,
+  outputFileName?: string
+): Promise<BinaryFile> {
+  const outputName =
+    outputFileName ?? `${file.name.replace(/\.[^/.]+$/, "")}-converted.mp4`;
+
+  ffmpeg.FS("writeFile", file.name, await fetchFile(file));
+  await ffmpeg.run(
+    "-i",
+    file.name,
+    "-vcodec",
+    "libx264",
+    "-crf",
+    "20",
+    outputName
+  );
+  const data = ffmpeg.FS("readFile", outputName);
+
+  const blob = new Blob([data.buffer], {
+    type: "video/mp4",
+  });
+
+  return {
+    name: outputName,
+    size: blob.size,
+    url: URL.createObjectURL(blob),
+    type: "video/mp4",
   };
 }

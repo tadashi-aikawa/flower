@@ -1,16 +1,24 @@
 <script lang="ts">
-  import { convertToGif } from "./converter";
+  import { convertToGif, convertToMp4 } from "./converter";
   import type { BinaryFile } from "./converter";
 
   let selected: File;
-  let gifPromise: Promise<BinaryFile>;
+  let promise: Promise<BinaryFile>;
+  let convertingWord: string;
 
-  export const changeFile = async (e) => {
+  const changeFile = async (e) => {
     selected = e.target.files[0];
   };
-  export const handleClickGif = async () => {
-    gifPromise = convertToGif(selected);
+  const handleClickGif = async () => {
+    convertingWord = "gifに変換中";
+    promise = convertToGif(selected);
   };
+  const handleClickMp4 = async () => {
+    convertingWord = "mp4に変換中";
+    promise = convertToMp4(selected);
+  };
+
+  const toKb = (file: BinaryFile) => `${(file.size / 1024).toFixed()}kb`;
 </script>
 
 <style>
@@ -41,27 +49,38 @@
         style="padding: 30px; width: 480px;" />
     </div>
     {#if selected}
+      <div>{toKb(selected)}</div>
       <div style="font-size: 3em;">↓</div>
-      <div><button on:click={handleClickGif}>gifに変換</button></div>
-      {#if gifPromise}
-        {#await gifPromise}
+      <div style="display: flex; gap: 1em;">
+        <button on:click={handleClickGif}>gifに変換</button>
+        <button on:click={handleClickMp4}>Mp4に変換</button>
+      </div>
+      {#if promise}
+        {#await promise}
           <div
             style="width: 640px; height: 480px; border: #666666 dashed 2px;"
             class="center">
-            gifに変換中...
+            {convertingWord}
           </div>
-        {:then gif}
+        {:then result}
           <div
             style="display: flex; gap: 30px; border: dimgrey dotted 1px; padding: 30px">
-            <div>
+            {#if result.type === 'image/gif'}
               <img
-                src={gif.url}
+                src={result.url}
                 alt="result"
                 style="object-fit: contain; max-height: 480px;" />
-            </div>
+            {/if}
+            {#if result.type === 'video/mp4'}
+              <video
+                src={result.url}
+                style="object-fit: contain; max-height: 480px;"
+                autoplay
+                controls />
+            {/if}
             <div style="padding: 30px;">
-              <a href={gif.url} download={gif.name}>
-                <button>ダウンロード ({(gif.size / 1024).toFixed()}kb)</button>
+              <a href={result.url} download={result.name}>
+                <button>ダウンロード ({toKb(result)})</button>
               </a>
             </div>
           </div>
