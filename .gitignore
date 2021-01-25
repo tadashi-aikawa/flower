@@ -1,5 +1,6 @@
 /node_modules/
 /public/build/
+/public/smelte.css
 
 .DS_Store
 /.idea
