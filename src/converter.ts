@@ -9,113 +9,71 @@ export type BinaryFile = {
   type: string;
 };
 
+async function convert(
+  file: File,
+  options: string[],
+  ext: string,
+  type: string,
+  outputFileName?: string
+): Promise<BinaryFile> {
+  const outputName =
+    outputFileName ?? `${file.name.replace(/\.[^/.]+$/, "")}.${ext}`;
+
+  ffmpeg.FS("writeFile", file.name, await fetchFile(file));
+  await ffmpeg.run("-i", file.name, ...options, `tmp.${ext}`);
+  const data = ffmpeg.FS("readFile", `tmp.${ext}`);
+
+  const blob = new Blob([data.buffer], {
+    type,
+  });
+
+  return {
+    name: outputName,
+    size: blob.size,
+    url: URL.createObjectURL(blob),
+    type,
+  };
+}
+
 export type ConvertHandler = (
   file: File,
   outputFileName?: string
 ) => Promise<BinaryFile>;
 
-export async function convertToGif(
+export const convertToGif = (
   file: File,
   outputFileName?: string
-): Promise<BinaryFile> {
-  const outputName =
-    outputFileName ?? `${file.name.replace(/\.[^/.]+$/, "")}.gif`;
-
-  ffmpeg.FS("writeFile", file.name, await fetchFile(file));
-  await ffmpeg.run(
-    "-i",
-    file.name,
-    "-filter_complex",
-    "[0:v] split [a][b];[a] palettegen [p];[b][p] paletteuse",
-    outputName
+): Promise<BinaryFile> =>
+  convert(
+    file,
+    [
+      "-filter_complex",
+      "[0:v] split [a][b];[a] palettegen [p];[b][p] paletteuse",
+    ],
+    "gif",
+    "image/gif",
+    outputFileName
   );
-  const data = ffmpeg.FS("readFile", outputName);
 
-  const blob = new Blob([data.buffer], {
-    type: "image/gif",
-  });
-
-  return {
-    name: outputName,
-    size: blob.size,
-    url: URL.createObjectURL(blob),
-    type: "image/gif",
-  };
-}
-
-export async function convertToMp4(
+export const convertToMp4 = (
   file: File,
   outputFileName?: string
-): Promise<BinaryFile> {
-  const outputName =
-    outputFileName ?? `${file.name.replace(/\.[^/.]+$/, "")}-converted.mp4`;
-
-  ffmpeg.FS("writeFile", file.name, await fetchFile(file));
-  await ffmpeg.run(
-    "-i",
-    file.name,
-    "-vcodec",
-    "libx264",
-    "-crf",
-    "20",
-    outputName
+): Promise<BinaryFile> =>
+  convert(
+    file,
+    ["-vcodec", "libx264", "-crf", "20"],
+    "mp4",
+    "video/mp4",
+    outputFileName
   );
-  const data = ffmpeg.FS("readFile", outputName);
 
-  const blob = new Blob([data.buffer], {
-    type: "video/mp4",
-  });
-
-  return {
-    name: outputName,
-    size: blob.size,
-    url: URL.createObjectURL(blob),
-    type: "video/mp4",
-  };
-}
-
-export async function convertToFavicon(
+export const convertToFavicon = (
   file: File,
   outputFileName?: string
-): Promise<BinaryFile> {
-  const outputName =
-    outputFileName ?? `${file.name.replace(/\.[^/.]+$/, "")}.ico`;
+): Promise<BinaryFile> =>
+  convert(file, ["-vf", "scale=256:-1"], "ico", "image/x-icon", outputFileName);
 
-  ffmpeg.FS("writeFile", file.name, await fetchFile(file));
-  await ffmpeg.run("-i", file.name, "-vf", "scale=256:-1", outputName);
-  const data = ffmpeg.FS("readFile", outputName);
-
-  const blob = new Blob([data.buffer], {
-    type: "image/x-icon",
-  });
-
-  return {
-    name: outputName,
-    size: blob.size,
-    url: URL.createObjectURL(blob),
-    type: "image/x-icon",
-  };
-}
-
-export async function convertToPng(
+export const convertToPng = (
   file: File,
   outputFileName?: string
-): Promise<BinaryFile> {
-  const outputName =
-    outputFileName ?? `${file.name.replace(/\.[^/.]+$/, "")}.png`;
-
-  ffmpeg.FS("writeFile", file.name, await fetchFile(file));
-  await ffmpeg.run("-i", file.name, "-vf", "scale=256:-1", outputName);
-  const data = ffmpeg.FS("readFile", outputName);
-
-  const blob = new Blob([data.buffer], {
-    type: "image/png",
-  });
-
-  return {
-    name: outputName,
-    size: blob.size,
-    url: URL.createObjectURL(blob),
-    type: "image/png",
-  };
-}
+): Promise<BinaryFile> => convert(file, [], "png", "image/png", outputFileName);
