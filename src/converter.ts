@@ -6,7 +6,7 @@ export type BinaryFile = {
   name: string;
   size: number;
   url: string;
-  type: "image/gif" | "video/mp4" | "image/x-icon";
+  type: string;
 };
 
 export type ConvertHandler = (
@@ -94,5 +94,28 @@ export async function convertToFavicon(
     size: blob.size,
     url: URL.createObjectURL(blob),
     type: "image/x-icon",
+  };
+}
+
+export async function convertToPng(
+  file: File,
+  outputFileName?: string
+): Promise<BinaryFile> {
+  const outputName =
+    outputFileName ?? `${file.name.replace(/\.[^/.]+$/, "")}.png`;
+
+  ffmpeg.FS("writeFile", file.name, await fetchFile(file));
+  await ffmpeg.run("-i", file.name, "-vf", "scale=256:-1", outputName);
+  const data = ffmpeg.FS("readFile", outputName);
+
+  const blob = new Blob([data.buffer], {
+    type: "image/png",
+  });
+
+  return {
+    name: outputName,
+    size: blob.size,
+    url: URL.createObjectURL(blob),
+    type: "image/png",
   };
 }

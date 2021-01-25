@@ -1,6 +1,11 @@
 <script lang="ts">
   import "smelte/src/tailwind.css";
-  import { convertToFavicon, convertToGif, convertToMp4 } from "./converter";
+  import {
+    convertToFavicon,
+    convertToGif,
+    convertToMp4,
+    convertToPng,
+  } from "./converter";
   import type { BinaryFile, ConvertHandler } from "./converter";
   import { List, ListItem, NavigationDrawer } from "smelte";
   import ConvertBox from "./ConvertBox.svelte";
@@ -13,6 +18,7 @@
     text: string;
     convertHandler?: ConvertHandler;
   }[] = [
+    { name: "png", text: "pngに変換", convertHandler: convertToPng },
     { name: "gif", text: "gifに変換", convertHandler: convertToGif },
     {
       name: "favicon",

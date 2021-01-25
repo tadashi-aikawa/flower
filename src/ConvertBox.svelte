@@ -11,7 +11,9 @@
 
   const changeFile = async (e) => {
     selectedFile = e.target.files[0];
-    promise = convertHandler(selectedFile);
+    if (selectedFile) {
+      promise = convertHandler(selectedFile);
+    }
   };
 
   // noinspection MagicNumberJS
@@ -27,7 +29,7 @@
       on:change={changeFile}
       style="padding: 30px; width: 480px;" />
   </div>
-  {#if promise}
+  {#if selectedFile && promise}
     {#await promise}
       <div
         style="border: dimgrey dotted 1px; padding: 30px"
@@ -42,13 +44,13 @@
       <div
         style="border: dimgrey dotted 1px; padding: 30px"
         class="flex flex-col justify-center">
-        {#if result.type === 'image/gif' || result.type === 'image/x-icon'}
+        {#if result.type.startsWith('image/')}
           <img
             src={result.url}
             alt="result"
             style="object-fit: contain; max-height: 480px;" />
         {/if}
-        {#if result.type === 'video/mp4'}
+        {#if result.type.startsWith('video/')}
           <video
             src={result.url}
             style="object-fit: contain; max-height: 480px;"
