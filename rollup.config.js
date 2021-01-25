@@ -59,7 +59,7 @@ export default {
       output: "public/smelte.css", // it defaults to static/global.css which is probably what you expect in Sapper
       postcss: [], // Your PostCSS plugins
       whitelist: [], // Array of classnames whitelisted from purging
-      whitelistPatterns: [], // Same as above, but list of regexes
+      whitelistPatternsChildren: [/draw.*/, /svelte-.*/], // workaround for purge necessary classes
       tailwind: {
         theme: {
           extend: {
