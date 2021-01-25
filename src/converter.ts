@@ -77,3 +77,8 @@ export const convertToPng = (
   file: File,
   outputFileName?: string
 ): Promise<BinaryFile> => convert(file, [], "png", "image/png", outputFileName);
+
+export const convertToJpg = (
+  file: File,
+  outputFileName?: string
+): Promise<BinaryFile> => convert(file, [], "jpg", "image/jpg", outputFileName);

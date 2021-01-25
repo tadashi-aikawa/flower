@@ -3,6 +3,7 @@
   import {
     convertToFavicon,
     convertToGif,
+    convertToJpg,
     convertToMp4,
     convertToPng,
   } from "./converter";
@@ -19,6 +20,7 @@
     convertHandler?: ConvertHandler;
   }[] = [
     { name: "png", text: "pngに変換", convertHandler: convertToPng },
+    { name: "jpg", text: "jpgに変換", convertHandler: convertToJpg },
     { name: "gif", text: "gifに変換", convertHandler: convertToGif },
     {
       name: "favicon",
